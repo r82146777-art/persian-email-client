@@ -42,6 +42,9 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.loginButton.setOnClickListener { doLogin() }
+        binding.tempMailButton.setOnClickListener {
+            startActivity(Intent(this, TempMailActivity::class.java))
+        }
     }
 
     private fun doLogin() {

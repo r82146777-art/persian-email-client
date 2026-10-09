@@ -38,5 +38,10 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize"
             android:parentActivityName=".InboxActivity" />
+
+        <activity
+            android:name=".TempMailActivity"
+            android:exported="false"
+            android:parentActivityName=".LoginActivity" />
     </application>
 </manifest>

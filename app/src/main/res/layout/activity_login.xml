@@ -112,6 +112,16 @@
             android:textSize="16sp"
             android:contentDescription="@string/btn_login" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/tempMailButton"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="12dp"
+            android:text="ایمیل موقت (Temp / Atomic)"
+            android:textSize="15sp"
+            android:contentDescription="ایجاد و مدیریت ایمیل موقت" />
+
         <ProgressBar
             android:id="@+id/progress"
             android:layout_width="wrap_content"
