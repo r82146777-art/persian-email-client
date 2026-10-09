@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ایمیل فارسی</string>
+    <string name="login_title">ورود به ایمیل</string>
+    <string name="email_hint">آدرس ایمیل</string>
+    <string name="password_hint">رمز عبور یا App Password</string>
+    <string name="provider_hint">سرویس‌دهنده</string>
+    <string name="btn_login">ورود و دریافت نامه‌ها</string>
+    <string name="inbox">صندوق ورودی</string>
+    <string name="refresh">بروزرسانی</string>
+    <string name="compose">نوشتن نامه</string>
+    <string name="logout">خروج</string>
+    <string name="to">گیرنده</string>
+    <string name="subject">موضوع</string>
+    <string name="body">متن نامه</string>
+    <string name="send">ارسال</string>
+    <string name="from">فرستنده</string>
+    <string name="date">تاریخ</string>
+    <string name="codes_found">کدهای پیدا شده</string>
+    <string name="copy_code">کپی کد</string>
+    <string name="no_messages">نامه‌ای نیست</string>
+    <string name="loading">در حال بارگذاری…</string>
+    <string name="login_help">برای جیمیل از «رمز برنامه» (App Password) استفاده کنید نه رمز اصلی.</string>
+</resources>

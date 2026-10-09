@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layoutDirection="rtl"
+    android:background="@color/bg">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/primary"
+        app:titleTextColor="@android:color/white"
+        app:navigationIcon="@android:drawable/ic_menu_revert"
+        app:navigationContentDescription="بازگشت" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/subject"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/text"
+                android:contentDescription="@string/subject" />
+
+            <TextView
+                android:id="@+id/from"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="14sp"
+                android:textColor="@color/text_muted"
+                android:contentDescription="@string/from" />
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="@color/text_muted"
+                android:contentDescription="@string/date" />
+
+            <LinearLayout
+                android:id="@+id/otpBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/otp_bg"
+                android:padding="12dp"
+                android:layout_marginTop="12dp"
+                android:visibility="gone"
+                android:contentDescription="@string/codes_found">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/codes_found"
+                    android:textStyle="bold"
+                    android:textColor="@color/accent" />
+
+                <TextView
+                    android:id="@+id/otpCodes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text"
+                    android:layout_marginTop="6dp"
+                    android:textIsSelectable="true" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/copyCodeBtn"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/copy_code"
+                    android:layout_marginTop="8dp"
+                    android:contentDescription="@string/copy_code" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textSize="15sp"
+                android:textColor="@color/text"
+                android:lineSpacingMultiplier="1.25"
+                android:textIsSelectable="true"
+                android:contentDescription="متن نامه" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
