@@ -22,7 +22,8 @@ object TempMailStore {
                 TempMailApi.TempAccount(
                     address = o.getString("address"),
                     password = o.getString("password"),
-                    token = o.optString("token", "")
+                    token = o.optString("token", ""),
+                    apiBase = o.optString("apiBase", "https://api.mail.tm")
                 )
             )
         }
@@ -65,6 +66,7 @@ object TempMailStore {
                     .put("address", a.address)
                     .put("password", a.password)
                     .put("token", a.token)
+                    .put("apiBase", a.apiBase)
             )
         }
         prefs(context).edit().putString(KEY_ACCOUNTS, arr.toString()).apply()

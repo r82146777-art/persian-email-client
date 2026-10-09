@@ -24,6 +24,7 @@ class TempMailActivity : AppCompatActivity() {
     private lateinit var adapter: EmailAdapter
     private var token: String = ""
     private var address: String = ""
+    private var apiBase: String = "https://api.mail.tm"
     private var pollJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,6 +74,7 @@ class TempMailActivity : AppCompatActivity() {
     private fun bindAccount(acc: TempMailApi.TempAccount) {
         address = acc.address
         token = acc.token
+        apiBase = acc.apiBase.ifBlank { "https://api.mail.tm" }
         binding.activeAddress.text = address
         binding.activeAddress.contentDescription = "آدرس فعال $address"
     }
@@ -96,7 +98,9 @@ class TempMailActivity : AppCompatActivity() {
                 binding.activeAddress.announceForAccessibility("ایمیل جدید ${acc.address}")
                 refreshMessages()
             }.onFailure { e ->
-                Toast.makeText(this@TempMailActivity, "خطا: ${e.message}", Toast.LENGTH_LONG).show()
+                val msg = e.message ?: "ساخت ایمیل ناموفق"
+                Toast.makeText(this@TempMailActivity, msg, Toast.LENGTH_LONG).show()
+                binding.activeAddress.announceForAccessibility(msg)
             }
         }
     }
@@ -122,7 +126,8 @@ class TempMailActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     val updated = withContext(Dispatchers.IO) {
                         try {
-                            val t = if (acc.token.isBlank()) TempMailApi.login(acc.address, acc.password) else acc.token
+                            val base = acc.apiBase.ifBlank { "https://api.mail.tm" }
+                            val t = if (acc.token.isBlank()) TempMailApi.login(acc.address, acc.password, base) else acc.token
                             acc.copy(token = t)
                         } catch (e: Exception) {
                             null
@@ -154,7 +159,7 @@ class TempMailActivity : AppCompatActivity() {
             if (acc != null) {
                 lifecycleScope.launch {
                     val t = withContext(Dispatchers.IO) {
-                        try { TempMailApi.login(acc.address, acc.password) } catch (_: Exception) { "" }
+                        try { TempMailApi.login(acc.address, acc.password, acc.apiBase.ifBlank { "https://api.mail.tm" }) } catch (_: Exception) { "" }
                     }
                     if (t.isNotBlank()) {
                         token = t
@@ -180,7 +185,7 @@ class TempMailActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
                 try {
-                    Result.success(TempMailApi.listMessages(token))
+                    Result.success(TempMailApi.listMessages(token, apiBase))
                 } catch (e: Exception) {
                     Result.failure(e)
                 }
@@ -220,7 +225,7 @@ class TempMailActivity : AppCompatActivity() {
         binding.swipe.isRefreshing = true
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
-                try { Result.success(TempMailApi.getMessage(token, id)) } catch (e: Exception) { Result.failure(e) }
+                try { Result.success(TempMailApi.getMessage(token, id, apiBase)) } catch (e: Exception) { Result.failure(e) }
             }
             binding.swipe.isRefreshing = false
             result.onSuccess { t ->

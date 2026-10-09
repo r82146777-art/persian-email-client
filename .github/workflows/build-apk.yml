@@ -27,8 +27,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1.0
-          name: "v1.1.0 - ایمیل موقت Temp/Atomic + ایجاد آدرس + ماندگار"
+          tag_name: v1.1.1
+          name: "v1.1.1 - fix temp email create (mail.tm JSON + Persian errors)"
           files: app/build/outputs/apk/debug/app-debug.apk
           generate_release_notes: true
         env:
