@@ -43,5 +43,11 @@
             android:name=".TempMailActivity"
             android:exported="false"
             android:parentActivityName=".LoginActivity" />
+
+        <activity
+            android:name=".SignupActivity"
+            android:exported="false"
+            android:parentActivityName=".LoginActivity"
+            android:configChanges="orientation|screenSize" />
     </application>
 </manifest>

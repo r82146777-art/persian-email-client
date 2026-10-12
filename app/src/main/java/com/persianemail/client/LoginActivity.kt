@@ -42,12 +42,29 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.loginButton.setOnClickListener { doLogin() }
+        binding.signupButton.setOnClickListener { openSignup() }
         binding.tempMailButton.setOnClickListener {
             startActivity(Intent(this, TempMailActivity::class.java))
         }
     }
 
+    private fun openSignup() {
+        val pos = binding.providerSpinner.selectedItemPosition.coerceIn(0, Providers.list.lastIndex)
+        val preset = Providers.list[pos]
+        if (preset.signupUrl.isBlank()) {
+            Toast.makeText(this, "برای «سفارشی» ثبت‌نام آنلاین نیست. سرویس دیگری انتخاب کنید یا ایمیل موقت بسازید.", Toast.LENGTH_LONG).show()
+            return
+        }
+        startActivity(
+            Intent(this, SignupActivity::class.java)
+                .putExtra("provider_name", preset.name)
+                .putExtra("signup_url", preset.signupUrl)
+                .putExtra("signup_hint", preset.signupHint)
+        )
+    }
+
     private fun doLogin() {
+
         val email = binding.emailInput.text?.toString()?.trim().orEmpty()
         val pass = binding.passwordInput.text?.toString()?.trim().orEmpty()
         if (email.isEmpty() || pass.isEmpty()) {

@@ -45,6 +45,7 @@ class TempMailActivity : AppCompatActivity() {
 
         binding.btnCopy.setOnClickListener { copyAddress() }
         binding.btnCreate.setOnClickListener { createNew() }
+        binding.btnCreateAtomic.setOnClickListener { createNew() }
         binding.btnSwitch.setOnClickListener { showManage() }
         binding.swipe.setOnRefreshListener { refreshMessages() }
 

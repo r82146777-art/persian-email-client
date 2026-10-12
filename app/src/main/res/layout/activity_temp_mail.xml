@@ -77,10 +77,19 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="ایجاد ایمیل جدید"
+                        android:text="ایجاد Temp"
                         android:layout_marginStart="4dp"
-                        android:contentDescription="ایجاد ایمیل موقت جدید" />
+                        android:contentDescription="ایجاد ایمیل موقت" />
                 </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCreateAtomic"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="ایجاد Atomic-style (ایمیل یک‌بارمصرف)"
+                    android:contentDescription="ایجاد ایمیل اتمیک" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSwitch"

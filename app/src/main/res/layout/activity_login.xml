@@ -113,6 +113,16 @@
             android:contentDescription="@string/btn_login" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/signupButton"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="10dp"
+            android:text="ایجاد حساب جدید (Gmail / Outlook / …)"
+            android:textSize="15sp"
+            android:contentDescription="ایجاد حساب جدید در سرویس انتخاب‌شده" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/tempMailButton"
             style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent"
