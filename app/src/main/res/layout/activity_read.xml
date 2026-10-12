@@ -91,6 +91,34 @@
                     android:contentDescription="@string/copy_code" />
             </LinearLayout>
 
+            <!-- Verification / action links (Gmail-like) -->
+            <LinearLayout
+                android:id="@+id/linksBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#E3F2FD"
+                android:padding="12dp"
+                android:layout_marginTop="12dp"
+                android:visibility="gone"
+                android:contentDescription="لینک‌های تأیید و اقدام">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="لینک‌های تأیید / باز کردن"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary"
+                    android:contentDescription="لینک‌های تأیید" />
+
+                <LinearLayout
+                    android:id="@+id/linksContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/body"
                 android:layout_width="match_parent"

@@ -167,4 +167,17 @@ object MailService {
         }
         return sb.toString().trim()
     }
+
+    private fun htmlToTextKeepLinks(html: String): String {
+        var s = html
+        s = Regex("(?is)<a[^>]+href\\s*=\\s*[\"'](https?://[^\"']+)[\"'][^>]*>(.*?)</a>").replace(s) { m ->
+            val url = m.groupValues[1]
+            val label = m.groupValues[2].replace(Regex("<[^>]+>"), "").trim()
+            if (label.isNotBlank()) "$label $url " else "$url "
+        }
+        s = s.replace(Regex("(?i)<br\\s*/?>"), "\n")
+        s = s.replace(Regex("(?i)</p>"), "\n")
+        s = s.replace(Regex("<[^>]+>"), " ")
+        return s.replace(Regex("\\s+"), " ").trim()
+    }
 }
