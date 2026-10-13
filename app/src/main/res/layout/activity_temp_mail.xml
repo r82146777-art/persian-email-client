@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/primary"
-            app:title="ایمیل موقت"
+            app:title="ایمیل موقت / اتمیک"
             app:titleTextColor="@android:color/white" />
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -41,7 +41,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="آدرس فعال (مثل Temp / Atomic Email)"
+                    android:text="آدرس فعال"
                     android:textSize="12sp"
                     android:textColor="@color/text_muted" />
 
@@ -56,47 +56,87 @@
                     android:layout_marginTop="4dp"
                     android:contentDescription="آدرس ایمیل موقت فعال" />
 
-                <LinearLayout
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCopy"
+                    style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="10dp">
+                    android:layout_marginTop="8dp"
+                    android:text="کپی آدرس"
+                    android:contentDescription="کپی آدرس ایمیل" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnCopy"
-                        style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="کپی آدرس"
-                        android:layout_marginEnd="4dp"
-                        android:contentDescription="کپی آدرس ایمیل" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:text="ایجاد ایمیل جدید با نام کاربری دلخواه"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="@color/text"
+                    android:contentDescription="ایجاد ایمیل جدید با نام کاربری" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnCreate"
-                        android:layout_width="0dp"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/usernameInput"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="ایجاد Temp"
-                        android:layout_marginStart="4dp"
-                        android:contentDescription="ایجاد ایمیل موقت" />
-                </LinearLayout>
+                        android:hint="نام کاربری (مثلا ali2026)"
+                        android:inputType="textEmailAddress"
+                        android:maxLines="1"
+                        android:contentDescription="نام کاربری ایمیل" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="دامنه"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_muted" />
+
+                <Spinner
+                    android:id="@+id/domainSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:contentDescription="انتخاب دامنه" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnCreateAtomic"
+                    android:id="@+id/btnCreateAccount"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="10dp"
+                    android:text="ایجاد حساب / ایمیل جدید"
+                    android:textSize="16sp"
+                    android:contentDescription="ایجاد حساب ایمیل جدید با نام کاربری" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCreateRandom"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="ساخت تصادفی (بدون نام کاربری)"
+                    android:contentDescription="ساخت ایمیل تصادفی" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAtomicOfficial"
                     style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="ایجاد Atomic-style (ایمیل یک‌بارمصرف)"
-                    android:contentDescription="ایجاد ایمیل اتمیک" />
+                    android:text="ثبت‌نام Atomic Mail رسمی (@atomicmail.io)"
+                    android:contentDescription="ثبت‌نام در Atomic Mail رسمی" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSwitch"
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="تعویض / مدیریت آدرس‌های ذخیره‌شده"
+                    android:text="مدیریت آدرس‌های ذخیره‌شده"
                     android:contentDescription="مدیریت ایمیل‌های موقت" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -105,7 +145,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="16dp"
-            android:text="صندوق ورودی موقت — با خروج از برنامه پاک نمی‌شود"
+            android:text="صندوق ورودی — نامه‌ها و کد تأیید اینجا می‌آیند"
             android:textSize="13sp"
             android:textColor="@color/text_muted"
             android:contentDescription="صندوق ورودی موقت" />

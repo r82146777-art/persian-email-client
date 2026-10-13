@@ -37,6 +37,108 @@ object TempMailApi {
         val codes: List<String> = emptyList()
     )
 
+
+    /** Create with chosen username (like Atomic: type name → create). */
+    fun createWithUsername(usernameRaw: String, domainPreferred: String? = null): TempAccount {
+        val user = usernameRaw.trim().lowercase()
+            .replace(Regex("[^a-z0-9._-]"), "")
+            .trim('.', '_')
+        if (user.length < 3) throw IllegalStateException("نام کاربری حداقل ۳ حرف باشد")
+        if (user.length > 30) throw IllegalStateException("نام کاربری حداکثر ۳۰ حرف")
+
+        val errors = ArrayList<String>()
+        // 1) mail.tm custom address
+        try {
+            return createMailTmWithUser(user, domainPreferred)
+        } catch (e: Exception) {
+            errors.add("Mail.tm: ${e.message}")
+        }
+        // 2) guerrilla custom
+        try {
+            return createGuerrillaWithUser(user)
+        } catch (e: Exception) {
+            errors.add("Guerrilla: ${e.message}")
+        }
+        // 3) fallback random if custom fails
+        try {
+            return createRandomAccount()
+        } catch (e: Exception) {
+            errors.add(e.message ?: "")
+        }
+        throw IllegalStateException("نتوانست با این نام کاربری بسازد:\n" + errors.joinToString("\n"))
+    }
+
+    fun listAvailableDomains(): List<String> {
+        val out = LinkedHashSet<String>()
+        for (base in listOf("https://api.mail.tm", "https://api.mail.gw")) {
+            try {
+                out.addAll(fetchMailTmDomains(base))
+            } catch (_: Exception) {}
+        }
+        // common guerrilla domains
+        out.add("guerrillamailblock.com")
+        out.add("guerrillamail.com")
+        out.add("sharklasers.com")
+        out.add("grr.la")
+        if (out.isEmpty()) out.add("maxxspace.com")
+        return out.toList()
+    }
+
+    private fun createMailTmWithUser(user: String, domainPreferred: String?): TempAccount {
+        var last: Exception? = null
+        for (base in listOf("https://api.mail.tm", "https://api.mail.gw")) {
+            try {
+                val domains = fetchMailTmDomains(base)
+                if (domains.isEmpty()) continue
+                val domain = when {
+                    !domainPreferred.isNullOrBlank() && domains.any { it.equals(domainPreferred, true) } -> domainPreferred
+                    !domainPreferred.isNullOrBlank() && domainPreferred.contains("guerrilla", true) -> domains.random()
+                    else -> domains.random()
+                }
+                val address = "$user@$domain"
+                val password = "Aa1" + UUID.randomUUID().toString().replace("-", "")
+                try {
+                    httpJson("POST", "$base/accounts", JSONObject().put("address", address).put("password", password).toString())
+                } catch (e: Exception) {
+                    // if taken, try suffix
+                    if ((e.message ?: "").contains("422") || (e.message ?: "").contains("نامعتبر")) {
+                        val address2 = user + UUID.randomUUID().toString().replace("-", "").take(4) + "@" + domain
+                        httpJson("POST", "$base/accounts", JSONObject().put("address", address2).put("password", password).toString())
+                        val tokenRes = httpJson("POST", "$base/token", JSONObject().put("address", address2).put("password", password).toString())
+                        val token = JSONObject(tokenRes).optString("token")
+                        if (token.isBlank()) throw IllegalStateException("توکن خالی")
+                        return TempAccount(address2, password, token, base, "mailtm")
+                    }
+                    throw e
+                }
+                val tokenRes = httpJson("POST", "$base/token", JSONObject().put("address", address).put("password", password).toString())
+                val token = JSONObject(tokenRes).optString("token")
+                if (token.isBlank()) throw IllegalStateException("توکن خالی")
+                return TempAccount(address, password, token, base, "mailtm")
+            } catch (e: Exception) {
+                last = e
+            }
+        }
+        throw last ?: IllegalStateException("mail.tm در دسترس نیست")
+    }
+
+    private fun createGuerrillaWithUser(user: String): TempAccount {
+        val res = httpJson("GET", "https://api.guerrillamail.com/ajax.php?f=get_email_address&lang=en", null)
+        val o = JSONObject(res)
+        var sid = o.optString("sid_token")
+        if (sid.isBlank()) throw IllegalStateException("Guerrilla بدون sid")
+        val res2 = httpJson(
+            "GET",
+            "https://api.guerrillamail.com/ajax.php?f=set_email_user&email_user=${enc(user)}&sid_token=${enc(sid)}&lang=en",
+            null
+        )
+        val o2 = JSONObject(res2)
+        val address = o2.optString("email_addr")
+        sid = o2.optString("sid_token").ifBlank { sid }
+        if (address.isBlank()) throw IllegalStateException("Guerrilla نتوانست نام کاربری را ست کند")
+        return TempAccount(address = address, token = sid, provider = "guerrilla", apiBase = "https://api.guerrillamail.com")
+    }
+
     fun createRandomAccount(): TempAccount {
         val errors = ArrayList<String>()
         // Order: often most reachable first
