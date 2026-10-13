@@ -40,11 +40,11 @@ class TempMailActivity : AppCompatActivity() {
         binding.list.adapter = adapter
 
         binding.btnCopy.setOnClickListener { copyAddress() }
-        binding.btnCreateAccount.setOnClickListener { createWithUsername() }
+        binding.btnRefresh.setOnClickListener { loadMessages(true) }
         binding.btnCreateRandom.setOnClickListener { createRandom() }
-        binding.btnAtomicOfficial.setOnClickListener { openAtomicOfficial() }
+        binding.btnCreateAccount.setOnClickListener { createWithUsername() }
         binding.btnSwitch.setOnClickListener { showManage() }
-        binding.swipe.setOnRefreshListener { loadMessages() }
+        binding.swipe.setOnRefreshListener { loadMessages(true) }
 
         loadDomains()
         ensureAccountThenLoad()
@@ -53,6 +53,7 @@ class TempMailActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         startPolling()
+        if (current != null) loadMessages(false)
     }
 
     override fun onPause() {
@@ -66,7 +67,7 @@ class TempMailActivity : AppCompatActivity() {
                 try {
                     TempMailApi.listAvailableDomains()
                 } catch (_: Exception) {
-                    listOf("maxxspace.com", "guerrillamailblock.com")
+                    listOf("maxxspace.com")
                 }
             }
             domains = list
@@ -79,66 +80,26 @@ class TempMailActivity : AppCompatActivity() {
         val existing = TempMailStore.getActive(this)?.let { TempMailStore.getAccount(this, it) }
         if (existing != null) {
             bindAccount(existing)
-            loadMessages()
+            loadMessages(true)
         } else {
-            binding.activeAddress.text = "نام کاربری بزنید و «ایجاد حساب» را بزنید"
+            binding.activeAddress.text = "هنوز ایمیلی نیست — «ایمیل جدید» را بزنید"
+            binding.statusText.text = "آماده برای ساخت"
+            binding.empty.visibility = View.VISIBLE
         }
     }
 
     private fun bindAccount(acc: TempMailApi.TempAccount) {
         current = acc
         binding.activeAddress.text = acc.address
-        val providerLabel = when (acc.provider) {
-            "tempmaillol" -> "TempMail.lol"
-            "guerrilla" -> "Guerrilla"
-            "tempmailio" -> "Temp-Mail.io"
-            else -> "Mail.tm"
-        }
+        val label = if (acc.provider == "guerrilla") "Guerrilla" else "Mail.tm"
+        supportActionBar?.subtitle = label
         binding.activeAddress.contentDescription = "آدرس فعال ${acc.address}"
-        supportActionBar?.subtitle = providerLabel
-    }
-
-    private fun createWithUsername() {
-        val user = binding.usernameInput.text?.toString()?.trim().orEmpty()
-        if (user.length < 3) {
-            Toast.makeText(this, "نام کاربری حداقل ۳ حرف باشد", Toast.LENGTH_SHORT).show()
-            binding.usernameInput.requestFocus()
-            return
-        }
-        val domain = try {
-            binding.domainSpinner.selectedItem?.toString()
-        } catch (_: Exception) {
-            null
-        }
-        binding.swipe.isRefreshing = true
-        binding.activeAddress.text = "در حال ایجاد $user@…"
-        lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                try {
-                    Result.success(TempMailApi.createWithUsername(user, domain))
-                } catch (e: Exception) {
-                    Result.failure(e)
-                }
-            }
-            binding.swipe.isRefreshing = false
-            result.onSuccess { acc ->
-                TempMailStore.save(this@TempMailActivity, acc)
-                bindAccount(acc)
-                adapter.submit(emptyList())
-                Toast.makeText(this@TempMailActivity, "حساب ساخته شد: ${acc.address}", Toast.LENGTH_LONG).show()
-                binding.activeAddress.announceForAccessibility("ایمیل ${acc.address} ساخته شد")
-                loadMessages()
-            }.onFailure { e ->
-                val msg = e.message ?: "ساخت ناموفق"
-                binding.activeAddress.text = "خطا در ایجاد"
-                Toast.makeText(this@TempMailActivity, msg, Toast.LENGTH_LONG).show()
-            }
-        }
+        binding.statusText.text = "ذخیره شد — $label"
     }
 
     private fun createRandom() {
+        binding.statusText.text = "در حال ساخت ایمیل…"
         binding.swipe.isRefreshing = true
-        binding.activeAddress.text = "در حال ساخت تصادفی…"
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
                 try {
@@ -152,71 +113,102 @@ class TempMailActivity : AppCompatActivity() {
                 TempMailStore.save(this@TempMailActivity, acc)
                 bindAccount(acc)
                 adapter.submit(emptyList())
-                Toast.makeText(this@TempMailActivity, "ایمیل: ${acc.address}", Toast.LENGTH_LONG).show()
-                loadMessages()
+                tempIdMap.clear()
+                binding.empty.visibility = View.VISIBLE
+                Toast.makeText(this@TempMailActivity, "ساخته شد: ${acc.address}", Toast.LENGTH_LONG).show()
+                binding.activeAddress.announceForAccessibility("ایمیل ${acc.address} ساخته و ذخیره شد")
+                loadMessages(false)
             }.onFailure { e ->
+                binding.statusText.text = "خطا در ساخت"
                 Toast.makeText(this@TempMailActivity, e.message ?: "خطا", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    private fun openAtomicOfficial() {
-        startActivity(
-            Intent(this, SignupActivity::class.java)
-                .putExtra("provider_name", "Atomic Mail")
-                .putExtra("signup_url", "https://atomicmail.io/app/auth/sign-up")
-                .putExtra(
-                    "signup_hint",
-                    "نام و نام‌خانوادگی، سپس نام کاربری دلخواه (مثلا ali) تا آدرس ali@atomicmail.io ساخته شود. رمز بگذارید و Seed Phrase را ذخیره کنید. بدون شماره موبایل."
-                )
-        )
+    private fun createWithUsername() {
+        val user = binding.usernameInput.text?.toString()?.trim().orEmpty()
+        if (user.length < 3) {
+            Toast.makeText(this, "نام کاربری حداقل ۳ حرف", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val domain = try {
+            binding.domainSpinner.selectedItem?.toString()
+        } catch (_: Exception) {
+            null
+        }
+        binding.statusText.text = "در حال ایجاد $user@…"
+        binding.swipe.isRefreshing = true
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                try {
+                    Result.success(TempMailApi.createWithUsername(user, domain))
+                } catch (e: Exception) {
+                    Result.failure(e)
+                }
+            }
+            binding.swipe.isRefreshing = false
+            result.onSuccess { acc ->
+                TempMailStore.save(this@TempMailActivity, acc)
+                bindAccount(acc)
+                adapter.submit(emptyList())
+                tempIdMap.clear()
+                binding.empty.visibility = View.VISIBLE
+                Toast.makeText(this@TempMailActivity, "ساخته شد: ${acc.address}", Toast.LENGTH_LONG).show()
+                loadMessages(false)
+            }.onFailure { e ->
+                binding.statusText.text = "خطا"
+                Toast.makeText(this@TempMailActivity, e.message ?: "خطا", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     private fun copyAddress() {
         val address = current?.address.orEmpty()
         if (address.isBlank()) {
-            Toast.makeText(this, "اول یک ایمیل بسازید", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "اول ایمیل بسازید", Toast.LENGTH_SHORT).show()
             return
         }
         val cm = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         cm.setPrimaryClip(ClipData.newPlainText("temp-email", address))
-        Toast.makeText(this, "آدرس کپی شد", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "کپی شد: $address", Toast.LENGTH_SHORT).show()
     }
 
     private fun showManage() {
         val accounts = TempMailStore.list(this)
         if (accounts.isEmpty()) {
-            Toast.makeText(this, "هنوز ایمیلی ذخیره نشده", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "آدرس ذخیره‌شده‌ای نیست", Toast.LENGTH_SHORT).show()
             return
         }
         val labels = accounts.map { it.address }.toTypedArray()
         MaterialAlertDialogBuilder(this)
-            .setTitle("ایمیل‌های ذخیره‌شده")
+            .setTitle("آدرس‌های ذخیره‌شده")
             .setItems(labels) { _, which ->
                 val acc = accounts[which]
                 TempMailStore.setActive(this, acc.address)
                 bindAccount(acc)
-                loadMessages()
+                loadMessages(true)
             }
             .setNeutralButton("حذف فعال") { _, _ ->
                 current?.address?.let {
                     TempMailStore.remove(this, it)
                     current = null
-                    binding.activeAddress.text = "حذف شد — دوباره بسازید"
+                    binding.activeAddress.text = "حذف شد"
                     adapter.submit(emptyList())
+                    binding.empty.visibility = View.VISIBLE
                 }
             }
             .setNegativeButton("بستن", null)
             .show()
     }
 
-    private fun loadMessages() {
+    private fun loadMessages(showToast: Boolean) {
         val acc = current
         if (acc == null) {
             binding.swipe.isRefreshing = false
             return
         }
         binding.swipe.isRefreshing = true
+        binding.statusText.text = "در حال دریافت نامه…"
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
                 try {
@@ -226,12 +218,19 @@ class TempMailActivity : AppCompatActivity() {
                 }
             }
             binding.swipe.isRefreshing = false
-            result.onSuccess { list ->
+            result.onSuccess { pair ->
+                val fresh = pair.first
+                val list = pair.second
+                // persist refreshed token
+                if (fresh.token != acc.token || fresh.apiBase != acc.apiBase) {
+                    TempMailStore.save(this@TempMailActivity, fresh)
+                    current = fresh
+                }
                 val mapped = list.mapIndexed { idx, t ->
                     MailMessage(
                         uid = idx.toLong(),
-                        from = t.from,
-                        subject = t.subject,
+                        from = t.from.ifBlank { "(ناشناس)" },
+                        subject = t.subject.ifBlank { "(بدون موضوع)" },
                         date = t.createdAt.take(19).replace("T", " "),
                         preview = t.intro,
                         body = t.body.ifBlank { t.intro },
@@ -243,8 +242,19 @@ class TempMailActivity : AppCompatActivity() {
                 list.forEachIndexed { idx, t -> tempIdMap[idx.toLong()] = t.id }
                 adapter.submit(mapped)
                 binding.empty.visibility = if (mapped.isEmpty()) View.VISIBLE else View.GONE
+                binding.statusText.text = if (mapped.isEmpty()) {
+                    "صندوق خالی — منتظر نامه"
+                } else {
+                    "${mapped.size} نامه"
+                }
+                if (mapped.isNotEmpty()) {
+                    binding.list.announceForAccessibility("${mapped.size} نامه")
+                }
             }.onFailure { e ->
-                Toast.makeText(this@TempMailActivity, "دریافت نامه: ${e.message}", Toast.LENGTH_SHORT).show()
+                binding.statusText.text = "خطا در دریافت"
+                if (showToast) {
+                    Toast.makeText(this@TempMailActivity, "دریافت: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -253,6 +263,7 @@ class TempMailActivity : AppCompatActivity() {
         val id = tempIdMap[uid] ?: return
         val acc = current ?: return
         binding.swipe.isRefreshing = true
+        binding.statusText.text = "باز کردن نامه…"
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
                 try {
@@ -284,8 +295,8 @@ class TempMailActivity : AppCompatActivity() {
         pollJob?.cancel()
         pollJob = lifecycleScope.launch {
             while (isActive) {
-                delay(12000)
-                if (current != null) loadMessages()
+                delay(8000)
+                if (current != null) loadMessages(false)
             }
         }
     }

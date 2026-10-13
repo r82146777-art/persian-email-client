@@ -27,8 +27,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.5.0
-          name: "v1.5.0 - custom username create like Atomic Mail"
+          tag_name: v1.6.0
+          name: "v1.6.0 - fix temp inbox receive + persist address"
           files: app/build/outputs/apk/debug/app-debug.apk
           generate_release_notes: true
         env:

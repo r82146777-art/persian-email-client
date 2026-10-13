@@ -5,27 +5,31 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 object TempMailStore {
-    private const val PREFS = "temp_mail_store"
+    private const val PREFS = "temp_mail_store_v2"
     private const val KEY_ACCOUNTS = "accounts"
     private const val KEY_ACTIVE = "active_address"
 
     fun list(context: Context): List<TempMailApi.TempAccount> {
         val raw = prefs(context).getString(KEY_ACCOUNTS, "[]") ?: "[]"
-        val arr = JSONArray(raw)
-        val out = ArrayList<TempMailApi.TempAccount>()
-        for (i in 0 until arr.length()) {
-            val o = arr.getJSONObject(i)
-            out.add(
-                TempMailApi.TempAccount(
-                    address = o.getString("address"),
-                    password = o.optString("password", ""),
-                    token = o.optString("token", ""),
-                    apiBase = o.optString("apiBase", ""),
-                    provider = o.optString("provider", "mailtm")
+        return try {
+            val arr = JSONArray(raw)
+            val out = ArrayList<TempMailApi.TempAccount>()
+            for (i in 0 until arr.length()) {
+                val o = arr.getJSONObject(i)
+                out.add(
+                    TempMailApi.TempAccount(
+                        address = o.getString("address"),
+                        password = o.optString("password", ""),
+                        token = o.optString("token", ""),
+                        apiBase = o.optString("apiBase", ""),
+                        provider = o.optString("provider", "mailtm")
+                    )
                 )
-            )
+            }
+            out
+        } catch (_: Exception) {
+            emptyList()
         }
-        return out
     }
 
     fun save(context: Context, account: TempMailApi.TempAccount) {
@@ -40,7 +44,7 @@ object TempMailStore {
         val list = list(context).filterNot { it.address.equals(address, true) }
         writeAll(context, list)
         if (getActive(context)?.equals(address, true) == true) {
-            prefs(context).edit().putString(KEY_ACTIVE, list.firstOrNull()?.address ?: "").apply()
+            prefs(context).edit().putString(KEY_ACTIVE, list.firstOrNull()?.address ?: "").commit()
         }
     }
 
@@ -50,7 +54,7 @@ object TempMailStore {
     }
 
     fun setActive(context: Context, address: String) {
-        prefs(context).edit().putString(KEY_ACTIVE, address).apply()
+        prefs(context).edit().putString(KEY_ACTIVE, address).commit()
     }
 
     fun getAccount(context: Context, address: String): TempMailApi.TempAccount? =
@@ -68,7 +72,7 @@ object TempMailStore {
                     .put("provider", a.provider)
             )
         }
-        prefs(context).edit().putString(KEY_ACCOUNTS, arr.toString()).apply()
+        prefs(context).edit().putString(KEY_ACCOUNTS, arr.toString()).commit()
     }
 
     private fun prefs(context: Context) =
