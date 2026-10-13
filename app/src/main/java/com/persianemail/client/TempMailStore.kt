@@ -4,9 +4,6 @@ import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 
-/**
- * Persist temp mailboxes so they stay after leaving the app.
- */
 object TempMailStore {
     private const val PREFS = "temp_mail_store"
     private const val KEY_ACCOUNTS = "accounts"
@@ -21,9 +18,10 @@ object TempMailStore {
             out.add(
                 TempMailApi.TempAccount(
                     address = o.getString("address"),
-                    password = o.getString("password"),
+                    password = o.optString("password", ""),
                     token = o.optString("token", ""),
-                    apiBase = o.optString("apiBase", "https://api.mail.tm")
+                    apiBase = o.optString("apiBase", ""),
+                    provider = o.optString("provider", "mailtm")
                 )
             )
         }
@@ -67,6 +65,7 @@ object TempMailStore {
                     .put("password", a.password)
                     .put("token", a.token)
                     .put("apiBase", a.apiBase)
+                    .put("provider", a.provider)
             )
         }
         prefs(context).edit().putString(KEY_ACCOUNTS, arr.toString()).apply()
